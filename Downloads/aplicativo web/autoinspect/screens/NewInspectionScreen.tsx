@@ -83,9 +83,7 @@ const NewInspectionScreen: React.FC = () => {
   };
 
   const deepClone = <T,>(obj: T): T => {
-  if (typeof structuredClone === 'function') {
-    return structuredClone(obj);
-  }
+  // Usar solo JSON.parse(JSON.stringify(obj)) para máxima compatibilidad (incluyendo iOS/Safari)
   return JSON.parse(JSON.stringify(obj));
 };
 
