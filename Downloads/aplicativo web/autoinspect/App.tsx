@@ -1,35 +1,5 @@
 
-import React, { useState, createContext, Dispatch, SetStateAction, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import HomeScreen from './screens/HomeScreen.tsx';
-import NewInspectionScreen from './screens/NewInspectionScreen.tsx';
-import PhotoCaptureScreen from './screens/PhotoCaptureScreen.tsx';
-import SummaryScreen from './screens/SummaryScreen.tsx';
-import InspectionsListScreen from './screens/InspectionsListScreen.tsx';
-import SettingsScreen from './screens/SettingsScreen.tsx';
-import HelpScreen from './screens/HelpScreen.tsx';
-import TermsScreen from './screens/TermsScreen.tsx';
-import PrivacyScreen from './screens/PrivacyScreen.tsx';
-import ProfileScreen from './screens/ProfileScreen.tsx';
-import ContactScreen from './screens/ContactScreen.tsx';
-import LicenseScreen from './screens/LicenseScreen.tsx';
-import BottomNav from './components/BottomNav.tsx';
-import { Inspection, InspectionStep, Vehicle } from './types.ts';
-import { initialInspectionState, initialVehicleState } from './constants.ts';
-
-interface InspectionContextType {
-  currentInspection: Inspection;
-  setCurrentInspection: Dispatch<SetStateAction<Inspection>>;
-  currentStep: InspectionStep;
-  setCurrentStep: Dispatch<SetStateAction<InspectionStep>>;
-  currentVehicleIndex: number;
-  setCurrentVehicleIndex: Dispatch<SetStateAction<number>>;
-  addVehicle: () => void;
-  removeVehicle: (index: number, latestInspectionData: Inspection) => void; // Updated signature
-  resetInspection: () => void;
-}
-
-export const InspectionContext = createContext<InspectionContextType | undefined>(undefined);
+import React from 'react';
 
 const App: React.FC = () => {
   return (
