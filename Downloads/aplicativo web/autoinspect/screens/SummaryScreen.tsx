@@ -6,7 +6,7 @@ import PageContainer from '../components/PageContainer.tsx';
 import Button from '../components/Button.tsx';
 import WizardSteps from '../components/WizardSteps.tsx';
 import { InspectionStep, SavedInspection, AllPhotoCategoryKeys, PhotoCategoryConfig } from '../types.ts'; 
-import { generatePdf } from '../services/pdfGenerator.ts';
+import { generatePdf, generatePdfBlobUrl } from '../services/pdfGenerator.ts';
 import { saveInspection } from '../services/inspectionService.ts';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -31,6 +31,8 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ label, value, isMissing = fal
 
 const SummaryScreen: React.FC = () => {
   const [visibleError, setVisibleError] = useState<string | null>(null);
+  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
+  const [isPreviewingPdf, setIsPreviewingPdf] = useState<boolean>(false);
 
   // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
   useEffect(() => {
@@ -192,6 +194,60 @@ const SummaryScreen: React.FC = () => {
     }}>
       <WizardSteps currentStep={wizardCurrentStep} />
       <div className="space-y-6 p-1">
+
+        {/* PDF Preview Section */}
+        {isPreviewingPdf && (
+          <div className="mb-4 flex flex-col items-center">
+            <div className="w-full max-w-[480px] border rounded shadow bg-white p-2">
+              <iframe
+                src={pdfPreviewUrl || ''}
+                title="PDF Preview"
+                style={{ width: '100%', height: '60vh', minHeight: 360, border: 'none' }}
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin"
+              />
+            </div>
+            <div className="flex gap-2 mt-2">
+              <Button onClick={() => setIsPreviewingPdf(false)} variant="outline">Cerrar Preview</Button>
+              <Button onClick={async () => {
+                setIsPreviewingPdf(false);
+                await handleGeneratePdf();
+              }}>Descargar PDF</Button>
+            </div>
+          </div>
+        )}
+
+        {/* PDF Preview Button */}
+        {!isPreviewingPdf && (
+          <div className="flex justify-center mb-4">
+            <Button
+              onClick={async () => {
+                setIsGeneratingPdf(true);
+                setModalMessage(null);
+                setModalTitle("Generando preview de PDF...");
+                setShowSuccessModal(false);
+                setShowErrorModal(false);
+                setPdfPreviewUrl(null);
+                try {
+                  const url = await generatePdfBlobUrl(currentInspection);
+                  setPdfPreviewUrl(url);
+                  setIsPreviewingPdf(true);
+                } catch (err: any) {
+                  setModalTitle("Error de Preview PDF");
+                  setModalMessage(String(err));
+                  setShowErrorModal(true);
+                } finally {
+                  setIsGeneratingPdf(false);
+                }
+              }}
+              size="lg"
+              isLoading={isGeneratingPdf}
+              className="w-full sm:w-auto"
+            >
+              {isGeneratingPdf ? 'Generando Preview...' : 'Vista Previa PDF'}
+            </Button>
+          </div>
+        )}
 
         <section className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-semibold app-text-secondary mb-3">Inspector & Insured Details</h2>
