@@ -32,6 +32,28 @@ interface InspectionContextType {
 export const InspectionContext = createContext<InspectionContextType | undefined>(undefined);
 
 const App: React.FC = () => {
+  const [globalError, setGlobalError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const handler = (event: ErrorEvent) => {
+      setGlobalError(event.message || 'Error desconocido');
+    };
+    window.addEventListener('error', handler);
+    return () => window.removeEventListener('error', handler);
+  }, []);
+
+  if (globalError) {
+    return (
+      <div style={{ padding: 32, color: 'red', fontWeight: 'bold', textAlign: 'center', background: '#fff' }}>
+        Error crítico: {globalError}
+        <br />
+        <span style={{ fontSize: 14, color: '#333', fontWeight: 'normal' }}>
+          Por favor, toma un pantallazo de este mensaje y envíalo a soporte.
+        </span>
+      </div>
+    );
+  }
+
   const [currentInspection, setCurrentInspection] = useState<Inspection>(initialInspectionState());
   const [currentStep, setCurrentStep] = useState<InspectionStep>(InspectionStep.VEHICLE_DETAILS);
   const [currentVehicleIndex, setCurrentVehicleIndex] = useState<number>(0);
