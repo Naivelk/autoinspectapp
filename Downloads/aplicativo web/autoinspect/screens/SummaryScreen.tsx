@@ -99,7 +99,7 @@ const SummaryScreen: React.FC = () => {
       console.error("SummaryScreen: Initial save error:", initialSaveError);
       setModalTitle("Save Error");
       if (initialSaveError.message?.startsWith('QuotaExceededError')) {
-        setModalMessage("Local Storage Full: Could not save inspection data. PDF generation aborted. Please clear old inspections.");
+        setModalMessage('No se pudo guardar la inspección. Por favor, libera espacio o elimina inspecciones antiguas.');
         setIsQuotaErrorContext(true);
         setCanRestartInspectionOnError(true); // Can start new if quota error on first save
       } else {

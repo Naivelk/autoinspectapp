@@ -6,9 +6,9 @@ import * as inspectionDb from './inspectionDb';
 const LOCAL_STORAGE_KEY = 'autoinspect_saved_inspections';
 const MIGRATION_FLAG_KEY = 'autoinspect_migrated_to_indexeddb';
 
-async function autoMigrateLocalStorageToIndexedDb() {
+export async function autoMigrateLocalStorageToIndexedDb() {
   if (typeof window === 'undefined') return;
-  if (localStorage.getItem(MIGRATION_FLAG_KEY) === 'true') return;
+  // Siempre intentamos limpiar localStorage, aunque ya esté migrado
   const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
   if (raw) {
     try {
@@ -16,16 +16,20 @@ async function autoMigrateLocalStorageToIndexedDb() {
       if (Array.isArray(inspections) && inspections.length > 0) {
         await inspectionDb.overwriteAllInspections(inspections);
       }
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
-      // Opcional: console.log('Migrated inspections from localStorage to IndexedDB.');
     } catch (e) {
       console.error('Migration from localStorage to IndexedDB failed:', e);
     }
-  } else {
-    localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
   }
+  localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
 }
+
+// Limpieza manual para usar desde la UI
+export function clearLegacyLocalStorageInspections() {
+  localStorage.removeItem(LOCAL_STORAGE_KEY);
+  localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+}
+
 
 // Ejecutar migración automática al cargar el módulo
 autoMigrateLocalStorageToIndexedDb();

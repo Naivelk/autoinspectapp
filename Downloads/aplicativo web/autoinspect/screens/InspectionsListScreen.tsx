@@ -2,20 +2,20 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, FileDown, Trash2, FileText, Edit3 } from 'lucide-react'; // Added Edit3
+import { PlusCircle, FileDown, Trash2, FileText, Edit3 } from 'lucide-react'; 
 import PageContainer from '../components/PageContainer.tsx';
 import Button from '../components/Button.tsx';
 import ConfirmationModal from '../components/ConfirmationModal.tsx';
-import { SavedInspection, InspectionStep } from '../types.ts'; // Added InspectionStep
-import { getInspections, overwriteAllInspections, getInspectionById } from '../services/inspectionService.ts';
+import { SavedInspection, InspectionStep } from '../types.ts'; 
+import { getInspections, overwriteAllInspections, getInspectionById, clearLegacyLocalStorageInspections, autoMigrateLocalStorageToIndexedDb } from '../services/inspectionService.ts';
 import { generatePdf } from '../services/pdfGenerator.ts'; 
-import { InspectionContext } from '../App.tsx'; // Added InspectionContext
+import { InspectionContext } from '../App.tsx'; 
 
 const InspectionCard: React.FC<{ 
   inspection: SavedInspection; 
   onDelete: (id: string) => void; 
   onDownloadPdf: (inspection: SavedInspection) => Promise<void>; 
-  onEdit: (id: string) => void; // Added onEdit prop
+  onEdit: (id: string) => void; 
 }> = ({ inspection, onDelete, onDownloadPdf, onEdit }) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -50,6 +50,18 @@ const InspectionCard: React.FC<{
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-md font-semibold app-text-primary">{vehicleSummaryText} {yearDisplay}</h3>
+          <h2 className="text-xl font-bold mb-4">Saved Inspections</h2>
+          {process.env.NODE_ENV !== 'production' && (
+            <button
+              onClick={() => {
+                clearLegacyLocalStorageInspections();
+                toast.success('Legacy localStorage cleared!');
+              }}
+              className="bg-red-200 text-red-800 rounded px-2 py-1 mb-2"
+            >
+              Limpiar localStorage (legacy)
+            </button>
+          )}
           <p className="text-xs text-gray-500">Insured: {inspection.insuredName || "(Not provided)"}</p>
           <p className="text-xs text-gray-500">Date: {new Date(inspection.inspectionDate).toLocaleDateString()}</p>
           <p className={`text-xs ${inspection.pdfGenerated ? 'text-green-600' : 'text-yellow-600'}`}>
@@ -101,6 +113,7 @@ const InspectionsListScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    autoMigrateLocalStorageToIndexedDb(); 
     fetchInspections();
   }, [fetchInspections]);
 

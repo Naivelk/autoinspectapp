@@ -1,64 +1,116 @@
 
-# AutoInspect - Aplicación de Inspección Vehicular
+# AutoInspect - Inspección Vehicular PWA
 
-AutoInspect es una aplicación web progresiva (PWA) diseñada para realizar inspecciones de vehículos de manera eficiente. Permite a los usuarios ingresar detalles de la inspección y del vehículo, capturar múltiples fotografías y generar un informe detallado en formato PDF. Toda la información se almacena localmente en el navegador del usuario, garantizando la privacidad y el funcionamiento offline.
+AutoInspect es una aplicación web progresiva (PWA) para inspección de vehículos, lista para usarse en cualquier dispositivo y funcionar completamente offline. Permite capturar datos, fotos, generar PDFs y gestionar inspecciones de manera segura y privada, aprovechando IndexedDB para almacenamiento eficiente.
 
-## Características Principales
+---
 
-*   **Flujo de Inspección Guiado:** Un asistente de varios pasos guía al usuario a través del proceso de inspección:
-    *   Detalles del Inspector y Asegurado.
-    *   Detalles del Vehículo (soporte para múltiples vehículos por inspección).
-    *   Captura de Fotografías por categorías.
-    *   Resumen y Confirmación.
-*   **Generación de PDF:** Crea informes de inspección profesionales en formato PDF con todos los datos y fotos.
-*   **Almacenamiento Local:** Todas las inspecciones y fotos se guardan directamente en el `localStorage` del navegador, permitiendo el acceso offline y manteniendo la privacidad de los datos.
-*   **Gestión de Inspecciones:**
-    *   Visualización de inspecciones guardadas.
-    *   Edición de inspecciones existentes.
-    *   Eliminación de inspecciones.
-    *   Re-descarga o re-generación de PDFs.
-*   **Interfaz de Usuario Moderna:** Diseño limpio y responsivo utilizando Tailwind CSS y Lucide Icons.
-*   **Personalización Básica:** Configuración de nombre de agente predeterminado.
-*   **Guía de Usuario Integrada:** Documentación dentro de la aplicación para ayudar a los usuarios.
+## 🚗 Características principales
 
-## Tecnologías Utilizadas
+- **PWA:** Instalación en móvil o PC, funciona offline.
+- **Flujo guiado:** Inspección paso a paso: datos, vehículos, fotos, resumen.
+- **Soporte multi-vehículo:** Cada inspección puede tener varios autos y fotos por categoría.
+- **Generación de PDF profesional:** Incluye fotos y todos los datos.
+- **Almacenamiento seguro:** Toda la información se guarda en IndexedDB (no localStorage), soportando archivos grandes sin errores de cuota.
+- **Gestión completa:** Ver, editar, eliminar inspecciones y re-generar PDFs.
+- **UI moderna:** Hecha con React, Tailwind CSS y Lucide Icons.
+- **Privacidad:** Nada sale de tu dispositivo.
 
-*   **React:** Biblioteca de JavaScript para construir la interfaz de usuario.
-*   **TypeScript:** Superset de JavaScript que añade tipado estático.
-*   **Tailwind CSS:** Framework CSS de utilidad para un diseño rápido y responsivo.
-    *   *Nota: Actualmente se usa el CDN de Tailwind para desarrollo. Para producción, se recomienda instalarlo como un plugin de PostCSS o usar la CLI de Tailwind.*
-*   **React Router:** Para la gestión de rutas y navegación en la aplicación (usando `HashRouter`).
-*   **jsPDF & jspdf-autotable:** Para la generación de documentos PDF.
-*   **Lucide Icons:** Set de iconos SVG.
-*   **ESM (ES Modules) via `esm.sh`:** Para la carga de dependencias directamente en el navegador a través de `importmap`.
+---
 
-## Estructura del Proyecto (Simplificada)
+## 🛠️ Tecnologías usadas
+
+- **React + Vite** (SPA ultra rápida)
+- **TypeScript**
+- **Tailwind CSS**
+- **React Router DOM**
+- **IndexedDB** (vía [idb](https://github.com/jakearchibald/idb))
+- **jsPDF** y **jspdf-autotable** (PDF)
+- **Lucide Icons**
+- **Netlify** (despliegue recomendado)
+
+---
+
+## 🚀 Instalación y ejecución local
+
+1. **Clona el repo:**
+   ```sh
+   git clone https://github.com/Naivelk/-autoinspectapp.git
+   cd -autoinspectapp
+   ```
+2. **Instala dependencias:**
+   ```sh
+   npm install
+   ```
+3. **Modo desarrollo:**
+   ```sh
+   npm run dev
+   ```
+4. **Build de producción:**
+   ```sh
+   npm run build
+   ```
+5. **Prueba el build localmente:**
+   ```sh
+   npx serve -s dist -l 5175
+   ```
+   Luego abre [http://localhost:5175](http://localhost:5175)
+
+---
+
+## 🌐 Despliegue en Netlify (SPA)
+
+1. Haz build (`npm run build`).
+2. Sube la carpeta `dist/` a Netlify (drag & drop o conecta GitHub).
+3. Asegúrate de tener un archivo `_redirects` con:
+   ```
+   /*    /index.html   200
+   ```
+   Así las rutas funcionan como SPA.
+
+---
+
+## 📦 Migración automática de datos
+
+- Si tienes inspecciones guardadas en `localStorage` de versiones anteriores, la app las migrará automáticamente a IndexedDB la primera vez que la abras tras actualizar.
+- Esto elimina errores de "Local Storage Full" y permite guardar muchas más fotos y PDFs.
+
+---
+
+## 📚 Estructura del proyecto
 
 ```
 /
-├── public/
-│   └── (Archivos estáticos si los hubiera, ej. favicon)
+├── public/                # Archivos estáticos (favicon, manifest, _redirects)
 ├── src/
-│   ├── components/     # Componentes reutilizables (Botones, Modales, etc.)
-│   ├── screens/        # Componentes de pantalla (Vistas principales)
-│   ├── services/       # Lógica de negocio (LocalStorage, PDF)
-│   ├── App.tsx         # Componente principal y configuración de rutas/contexto
-│   ├── constants.ts    # Constantes de la aplicación
-│   ├── index.tsx       # Punto de entrada de React
-│   ├── types.ts        # Definiciones de tipos de TypeScript
-│   └── metadata.json   # Metadatos de la aplicación
-├── index.html          # Archivo HTML principal (incluye importmap)
-└── README.md           # Esta documentación
+│   ├── components/        # Componentes reutilizables (UI)
+│   ├── screens/           # Pantallas principales (vistas)
+│   ├── services/          # Lógica de negocio (IndexedDB, PDF, etc)
+│   ├── App.tsx            # Contexto y rutas
+│   ├── constants.ts       # Constantes globales
+│   ├── index.tsx          # Entry point
+│   ├── types.ts           # Tipos TypeScript
+│   └── ...
+├── index.html             # HTML principal
+├── README.md              # Esta documentación
+└── ...
 ```
 
-## Configuración y Ejecución
+---
 
-Esta aplicación está diseñada para ejecutarse directamente en un navegador que soporte ES Modules y `importmap`. No requiere un proceso de compilación complejo para desarrollo básico.
+## 📝 Licencia
 
-1.  **Clonar el Repositorio (si aplica):**
-    ```bash
-    git clone <URL_DEL_REPOSITORIO>
-    cd <NOMBRE_DEL_DIRECTORIO>
+MIT. Desarrollado por Kevin Santiago Quimbaya Andrade.
+
+---
+
+## 📬 Contacto y soporte
+
+¿Dudas o sugerencias? Abre un issue o escribe a [support@autoinspect.app](mailto:support@autoinspect.app)
+
+---
+
+> **Tip:** Puedes agregar capturas de pantalla o GIFs en esta sección para mostrar la app en acción.
     ```
 2.  **Servir los Archivos:**
     Puedes usar cualquier servidor HTTP simple para servir los archivos estáticos (`index.html`, `src/index.tsx`, etc.) desde la raíz del proyecto. Algunas opciones:
