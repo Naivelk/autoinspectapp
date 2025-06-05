@@ -1,9 +1,67 @@
-
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable'; // ESM-compatible import
+import { SavedInspection } from '../types.ts';
 
-import { SavedInspection, PhotoCategoryKey, AllPhotoCategoryKeys, PhotoCategoryConfig } from '../types.ts';
-import { PDF_OPTIONS, APP_NAME } from '../constants.ts';
+/**
+ * Genera y descarga un PDF básico con jsPDF puro (texto e imagen base64 si existe).
+ */
+export const generatePdf = async (inspection: SavedInspection): Promise<void> => {
+  try {
+    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('INSPECCIÓN VEHÍCULO', 40, 80);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.text(`ID: ${inspection.id || 'sin id'}`, 40, 120);
+    doc.text(`Agente: ${inspection.agentName || 'sin nombre'}`, 40, 150);
+    doc.text(`Fecha: ${inspection.inspectionDate ? new Date(inspection.inspectionDate).toLocaleDateString() : 'sin fecha'}`, 40, 180);
+    // Imagen base64 (primera foto)
+    const firstVehicle = inspection.vehicles?.[0];
+    const firstPhoto = firstVehicle && Object.values(firstVehicle.photos)[0]?.base64;
+    if (firstPhoto) {
+      try {
+        doc.addImage(firstPhoto, 'JPEG', 40, 200, 120, 90);
+      } catch (err) {
+        doc.text('Error al cargar imagen', 40, 300);
+      }
+    }
+    doc.save('inspeccion.pdf');
+  } catch (e: any) {
+    throw new Error('[PDF] Error al generar PDF: ' + (e?.message || String(e)));
+  }
+};
+
+/**
+ * Genera un blob URL del PDF para previsualizar en un iframe/embed.
+ */
+export const generatePdfBlobUrl = async (inspection: SavedInspection): Promise<string> => {
+  try {
+    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('INSPECCIÓN VEHÍCULO', 40, 80);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.text(`ID: ${inspection.id || 'sin id'}`, 40, 120);
+    doc.text(`Agente: ${inspection.agentName || 'sin nombre'}`, 40, 150);
+    doc.text(`Fecha: ${inspection.inspectionDate ? new Date(inspection.inspectionDate).toLocaleDateString() : 'sin fecha'}`, 40, 180);
+    // Imagen base64 (primera foto)
+    const firstVehicle = inspection.vehicles?.[0];
+    const firstPhoto = firstVehicle && Object.values(firstVehicle.photos)[0]?.base64;
+    if (firstPhoto) {
+      try {
+        doc.addImage(firstPhoto, 'JPEG', 40, 200, 120, 90);
+      } catch (err) {
+        doc.text('Error al cargar imagen', 40, 300);
+      }
+    }
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    return url;
+  } catch (e: any) {
+    throw new Error('[PDF] Error al generar PDF: ' + (e?.message || String(e)));
+  }
+};
 
 /**
  * Generates and downloads the PDF for an inspection (used for final download).
@@ -41,13 +99,6 @@ export const generatePdf = async (inspection: SavedInspection): Promise<void> =>
     }
   }
 
-  // Helper to add tables (future-proof, ESM-safe)
-  function addTable(doc: jsPDF, columns: string[], rows: string[][], startY: number) {
-    try {
-      autoTable(doc, {
-        head: [columns],
-        body: rows,
-        startY,
         theme: 'grid',
         styles: { font: 'helvetica', fontSize: 10 },
       });
