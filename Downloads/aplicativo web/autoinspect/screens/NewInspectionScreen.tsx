@@ -82,47 +82,72 @@ const NewInspectionScreen: React.FC = () => {
     }
   };
 
-  const persistLocalFormToContext = () => {
-    setCurrentInspection(prevInsp => {
-      const updatedVehicles = prevInsp.vehicles.map((v, i) => 
-        i === currentVehicleIndex ? { ...activeVehicleData, clientId: v.clientId || activeVehicleData.clientId } : v
-      );
-      return {
-        ...prevInsp,
-        agentName: generalData.agentName,
-        insuredName: generalData.insuredName,
-        insuredDOB: generalData.insuredDOB,
-        vehicles: updatedVehicles,
-      };
-    });
-  };
+  const deepClone = <T,>(obj: T): T => {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(obj);
+  }
+  return JSON.parse(JSON.stringify(obj));
+};
 
-  const getLatestInspectionDataFromForm = (): Inspection => {
-    const vehiclesFromContext = [...currentInspection.vehicles];
-    if (vehiclesFromContext[currentVehicleIndex]) {
-      vehiclesFromContext[currentVehicleIndex] = { 
-        ...activeVehicleData, 
-        clientId: vehiclesFromContext[currentVehicleIndex].clientId || activeVehicleData.clientId 
-      };
-    } else {
-      vehiclesFromContext.push({ ...activeVehicleData });
-    }
-    
+const persistLocalFormToContext = () => {
+  setCurrentInspection(prevInsp => {
+    const updatedVehicles = prevInsp.vehicles.map((v, i) =>
+      i === currentVehicleIndex
+        ? { ...deepClone(activeVehicleData), clientId: v.clientId || activeVehicleData.clientId }
+        : deepClone(v)
+    );
     return {
-      ...currentInspection,
+      ...prevInsp,
       agentName: generalData.agentName,
       insuredName: generalData.insuredName,
       insuredDOB: generalData.insuredDOB,
-      vehicles: vehiclesFromContext,
+      vehicles: updatedVehicles,
     };
+  });
+};
+
+  const getLatestInspectionDataFromForm = (): Inspection => {
+  const vehiclesFromContext = currentInspection.vehicles.map((v) => deepClone(v));
+  if (vehiclesFromContext[currentVehicleIndex]) {
+    vehiclesFromContext[currentVehicleIndex] = {
+      ...deepClone(activeVehicleData),
+      clientId: vehiclesFromContext[currentVehicleIndex].clientId || activeVehicleData.clientId,
+    };
+  } else {
+    vehiclesFromContext.push(deepClone(activeVehicleData));
+  }
+
+  return {
+    ...currentInspection,
+    agentName: generalData.agentName,
+    insuredName: generalData.insuredName,
+    insuredDOB: generalData.insuredDOB,
+    vehicles: vehiclesFromContext,
   };
+};
 
 
   const handleAddVehicle = () => {
-    if (!validateVehicle(currentVehicleIndex, activeVehicleData, false)) return; 
-    persistLocalFormToContext(); 
-    addVehicle(); 
-  };
+  if (!validateVehicle(currentVehicleIndex, activeVehicleData, false)) return;
+  // Save current vehicle with deep clone
+  setCurrentInspection(prevInsp => {
+    const updatedVehicles = prevInsp.vehicles.map((v, i) =>
+      i === currentVehicleIndex
+        ? { ...deepClone(activeVehicleData), clientId: v.clientId || activeVehicleData.clientId }
+        : deepClone(v)
+    );
+    return {
+      ...prevInsp,
+      agentName: generalData.agentName,
+      insuredName: generalData.insuredName,
+      insuredDOB: generalData.insuredDOB,
+      vehicles: updatedVehicles,
+    };
+  });
+  setTimeout(() => {
+    addVehicle(); // This will append a new blank vehicle and update the index
+  }, 0);
+};
 
   const triggerRemoveVehicle = (indexToRemove: number) => {
     if (currentInspection.vehicles.length <= 1) {

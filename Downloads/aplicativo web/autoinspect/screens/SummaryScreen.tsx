@@ -30,6 +30,11 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ label, value, isMissing = fal
 );
 
 const SummaryScreen: React.FC = () => {
+  // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
+  useEffect(() => {
+    setIsGeneratingPdf(false);
+  }, [currentInspection.id]); // Si el id cambia, también reinicia (nuevo registro o regreso)
+
   console.log("SummaryScreen: Component rendering/re-rendering"); 
   const context = useContext(InspectionContext);
   const navigate = useNavigate();
