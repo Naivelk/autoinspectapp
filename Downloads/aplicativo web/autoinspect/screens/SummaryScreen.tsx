@@ -30,6 +30,13 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ label, value, isMissing = fal
 );
 
 const SummaryScreen: React.FC = () => {
+  const [visibleError, setVisibleError] = useState<string | null>(null);
+
+  // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
+  useEffect(() => {
+    setIsGeneratingPdf(false);
+  }, [currentInspection.id]); // Si el id cambia, también reinicia (nuevo registro o regreso)
+
   // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
   useEffect(() => {
     setIsGeneratingPdf(false);
@@ -52,27 +59,35 @@ const SummaryScreen: React.FC = () => {
   const { currentInspection, setCurrentStep, currentStep: wizardCurrentStep, resetInspection, setCurrentVehicleIndex } = context;
 
   useEffect(() => {
-    const basicDetailsMissing = !currentInspection.agentName;
-    
-    const photosMissing = currentInspection.vehicles.some(v => 
-        !Object.values(v.photos).some(photo => photo?.base64)
-    );
-
-    if (basicDetailsMissing) {
-      navigate('/new-inspection');
-      return;
-    }
-    if (photosMissing) {
-      const firstVehicleWithMissingPhotos = currentInspection.vehicles.findIndex(v => 
+    try {
+      if (!currentInspection) {
+        setVisibleError('No hay datos de inspección. Por favor, vuelve a comenzar.');
+        return;
+      }
+      const basicDetailsMissing = !currentInspection.agentName;
+      const photosMissing = currentInspection.vehicles.some(v =>
         !Object.values(v.photos).some(photo => photo?.base64)
       );
-      if (firstVehicleWithMissingPhotos !== -1) {
-        setCurrentVehicleIndex(firstVehicleWithMissingPhotos);
+
+      if (basicDetailsMissing) {
+        setVisibleError('Faltan los datos del agente. Por favor, vuelve a comenzar.');
+        //navigate('/new-inspection');
+        return;
       }
-      navigate('/photos');
-      return;
+      if (photosMissing) {
+        const firstVehicleWithMissingPhotos = currentInspection.vehicles.findIndex(v =>
+          !Object.values(v.photos).some(photo => photo?.base64)
+        );
+        setVisibleError(`Falta al menos una foto en el vehículo ${firstVehicleWithMissingPhotos + 1}. Por favor, regresa y agrega una foto.`);
+        //setCurrentVehicleIndex(firstVehicleWithMissingPhotos);
+        //navigate('/photos');
+        return;
+      }
+      setVisibleError(null);
+      setCurrentStep(InspectionStep.SUMMARY);
+    } catch (err: any) {
+      setVisibleError('Error inesperado: ' + (err?.message || String(err)));
     }
-    setCurrentStep(InspectionStep.SUMMARY);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentInspection, navigate, setCurrentStep, setCurrentVehicleIndex]);
 
@@ -155,6 +170,20 @@ const SummaryScreen: React.FC = () => {
     // isGeneratingPdf will be reset by modal interaction in all above paths
   };
 
+
+  if (visibleError) {
+    return (
+      <PageContainer title="Error" showBackButton onBack={() => navigate('/photos')}>
+        <div className="p-6 text-center text-red-600 font-semibold">
+          {visibleError}
+        </div>
+        <div className="flex justify-center mt-4">
+          <Button onClick={() => navigate('/photos')}>Volver a Fotos</Button>
+          <Button onClick={() => navigate('/new-inspection')} variant="outline" className="ml-2">Nuevo Registro</Button>
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer title="Inspection Summary" showBackButton onBack={() => {
