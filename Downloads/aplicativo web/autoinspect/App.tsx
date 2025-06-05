@@ -32,6 +32,12 @@ interface InspectionContextType {
 export const InspectionContext = createContext<InspectionContextType | undefined>(undefined);
 
 const App: React.FC = () => {
+  return (
+    <div style={{ padding: 32, fontSize: 24, color: 'green', textAlign: 'center' }}>
+      Hola mundo
+    </div>
+  );
+}
   const [globalError, setGlobalError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
