@@ -37,7 +37,10 @@ const App: React.FC = () => {
       Hola mundo
     </div>
   );
-}
+};
+
+export default App;
+
   const [globalError, setGlobalError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
