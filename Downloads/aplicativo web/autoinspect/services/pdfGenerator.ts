@@ -1,6 +1,6 @@
 
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { SavedInspection, PhotoCategoryKey, AllPhotoCategoryKeys, PhotoCategoryConfig } from '../types.ts';
 import { PDF_OPTIONS, APP_NAME } from '../constants.ts';
 
@@ -28,6 +28,13 @@ export const generatePdf = async (inspection: SavedInspection): Promise<void> =>
     }
     return false;
   };
+
+  // Helper para manejo global de errores en PDF
+  function showPdfErrorAlert(message: string) {
+    if (typeof window !== 'undefined') {
+      alert('Error generando PDF: ' + message);
+    }
+  }
 
   // Main Header - Only on the first page
   const addMainHeader = () => {
