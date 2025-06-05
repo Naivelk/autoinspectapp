@@ -63,61 +63,6 @@ export const generatePdfBlobUrl = async (inspection: SavedInspection): Promise<s
   }
 };
 
-/**
- * Generates and downloads the PDF for an inspection (used for final download).
- * For preview, use generatePdfBlobUrl.
- */
-export const generatePdf = async (inspection: SavedInspection): Promise<void> => {
-  const doc = new jsPDF({
-    orientation: 'p',
-    unit: 'pt',
-    format: 'a4',
-  });
-  let yPos = PDF_OPTIONS.PAGE_MARGIN;
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const contentWidth = pageWidth - (PDF_OPTIONS.PAGE_MARGIN * 2);
-  
-  const FONT_FAMILY_SANS_SERIF = 'helvetica'; // Using Helvetica as a professional sans-serif
-
-  const addPageIfNeeded = (estimatedHeight: number = 20) => {
-    if (yPos + estimatedHeight > pageHeight - PDF_OPTIONS.PAGE_MARGIN - PDF_OPTIONS.FONT_SIZE_FOOTER * 3) { // Reserve space for footer
-      doc.addPage();
-      yPos = PDF_OPTIONS.PAGE_MARGIN;
-      // Note: Header is not automatically added here to prevent recursion if header itself causes page break.
-      // It should be called explicitly after addPage() if needed, or managed by a flag.
-      // For this design, the main header is only on the first page. Subsequent pages start at PAGE_MARGIN.
-      return true; 
-    }
-    return false;
-  };
-
-  // Helper para manejo global de errores en PDF
-  function showPdfErrorAlert(message: string) {
-    if (typeof window !== 'undefined') {
-      alert('Error generando PDF: ' + message);
-    }
-  }
-
-        theme: 'grid',
-        styles: { font: 'helvetica', fontSize: 10 },
-      });
-    } catch (e) {
-      console.error('autoTable error:', e);
-      showPdfErrorAlert('Error al generar la tabla en el PDF.');
-    }
-  }
-
-  // Main Header - Only on the first page
-  const addMainHeader = () => {
-    // Logo Placeholder
-    doc.setFont(FONT_FAMILY_SANS_SERIF, 'bold');
-    doc.setFontSize(PDF_OPTIONS.FONT_SIZE_LOGO_TEXT);
-    doc.setTextColor(PDF_OPTIONS.BRAND_COLOR);
-    doc.text(APP_NAME, PDF_OPTIONS.PAGE_MARGIN, PDF_OPTIONS.PAGE_MARGIN + PDF_OPTIONS.FONT_SIZE_LOGO_TEXT);
-
-    // Main Title
-    doc.setFont(FONT_FAMILY_SANS_SERIF, 'bold');
     doc.setFontSize(PDF_OPTIONS.FONT_SIZE_MAIN_TITLE);
     doc.setTextColor(PDF_OPTIONS.BRAND_COLOR);
     doc.text("Vehicle Inspection Report", pageWidth / 2, PDF_OPTIONS.PAGE_MARGIN + PDF_OPTIONS.FONT_SIZE_MAIN_TITLE * 0.8, { align: 'center' });
