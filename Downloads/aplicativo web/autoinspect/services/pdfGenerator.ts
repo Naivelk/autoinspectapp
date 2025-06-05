@@ -311,6 +311,29 @@ export const generatePdf = async (inspection: SavedInspection): Promise<void> =>
  * Generates a PDF for preview (returns a blob URL, does NOT download).
  * Use this for PDF preview in an <iframe> or <embed>.
  */
+// Genera un PDF solo con texto simple para pruebas de compatibilidad
+export const generatePdfBlobUrlSoloTexto = async (inspection: SavedInspection): Promise<string> => {
+  try {
+    const doc = new jsPDF({ orientation: 'p', unit: 'pt', format: 'a4' });
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('PRUEBA PDF SOLO TEXTO', 40, 80);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.text(`ID: ${inspection.id || 'sin id'}`, 40, 120);
+    doc.text(`Agente: ${inspection.agentName || 'sin nombre'}`, 40, 150);
+    doc.text(`Fecha: ${inspection.inspectionDate ? new Date(inspection.inspectionDate).toLocaleDateString() : 'sin fecha'}`, 40, 180);
+    // Puedes agregar más campos aquí si lo deseas
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    console.log('[PDF SOLO TEXTO] URL generado:', url);
+    return url;
+  } catch (e: any) {
+    console.error('[PDF SOLO TEXTO] Error al generar PDF:', e);
+    throw new Error('[PDF SOLO TEXTO] Error: ' + (e?.message || String(e)));
+  }
+};
+
 export const generatePdfBlobUrl = async (inspection: SavedInspection): Promise<string> => {
   const doc = new jsPDF({
     orientation: 'p',

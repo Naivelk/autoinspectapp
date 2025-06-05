@@ -6,7 +6,7 @@ import PageContainer from '../components/PageContainer.tsx';
 import Button from '../components/Button.tsx';
 import WizardSteps from '../components/WizardSteps.tsx';
 import { InspectionStep, SavedInspection, AllPhotoCategoryKeys, PhotoCategoryConfig } from '../types.ts'; 
-import { generatePdf, generatePdfBlobUrl } from '../services/pdfGenerator.ts';
+import { generatePdf, generatePdfBlobUrl, generatePdfBlobUrlSoloTexto } from '../services/pdfGenerator.ts';
 import { saveInspection } from '../services/inspectionService.ts';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -217,9 +217,38 @@ const SummaryScreen: React.FC = () => {
           </div>
         )}
 
-        {/* PDF Preview Button */}
+        {/* Botón de prueba: PDF SOLO TEXTO */}
         {!isPreviewingPdf && (
-          <div className="flex justify-center mb-4">
+          <div className="flex flex-col items-center gap-2 mb-4">
+            <Button
+              variant="outline"
+              onClick={async () => {
+                setIsGeneratingPdf(true);
+                setModalMessage(null);
+                setModalTitle("Generando preview SOLO TEXTO...");
+                setShowSuccessModal(false);
+                setShowErrorModal(false);
+                setPdfPreviewUrl(null);
+                try {
+                  const url = await generatePdfBlobUrlSoloTexto(currentInspection);
+                  setPdfPreviewUrl(url);
+                  setIsPreviewingPdf(true);
+                } catch (err: any) {
+                  setModalTitle("Error de PDF SOLO TEXTO");
+                  setModalMessage(String(err));
+                  setShowErrorModal(true);
+                } finally {
+                  setIsGeneratingPdf(false);
+                }
+              }}
+              size="md"
+              isLoading={isGeneratingPdf}
+              className="w-full sm:w-auto"
+            >
+              {isGeneratingPdf ? 'Generando...' : 'Vista Previa SOLO TEXTO'}
+            </Button>
+
+            {/* PDF Preview Button normal */}
             <Button
               onClick={async () => {
                 setIsGeneratingPdf(true);
