@@ -7,7 +7,7 @@ import PageContainer from '../components/PageContainer.tsx';
 import Button from '../components/Button.tsx';
 import ConfirmationModal from '../components/ConfirmationModal.tsx';
 import { SavedInspection, InspectionStep } from '../types.ts'; 
-import { getInspections, overwriteAllInspections, getInspectionById, clearLegacyLocalStorageInspections, autoMigrateLocalStorageToIndexedDb } from '../services/inspectionService.ts';
+import { getInspections, overwriteAllInspections, getInspectionById } from '../services/inspectionService';
 import { generatePdf } from '../services/pdfGenerator.ts'; 
 import { InspectionContext } from '../App.tsx'; 
 
@@ -51,17 +51,6 @@ const InspectionCard: React.FC<{
         <div>
           <h3 className="text-md font-semibold app-text-primary">{vehicleSummaryText} {yearDisplay}</h3>
           <h2 className="text-xl font-bold mb-4">Saved Inspections</h2>
-          {process.env.NODE_ENV !== 'production' && (
-            <button
-              onClick={() => {
-                clearLegacyLocalStorageInspections();
-                toast.success('Legacy localStorage cleared!');
-              }}
-              className="bg-red-200 text-red-800 rounded px-2 py-1 mb-2"
-            >
-              Limpiar localStorage (legacy)
-            </button>
-          )}
           <p className="text-xs text-gray-500">Insured: {inspection.insuredName || "(Not provided)"}</p>
           <p className="text-xs text-gray-500">Date: {new Date(inspection.inspectionDate).toLocaleDateString()}</p>
           <p className={`text-xs ${inspection.pdfGenerated ? 'text-green-600' : 'text-yellow-600'}`}>
@@ -113,7 +102,6 @@ const InspectionsListScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    autoMigrateLocalStorageToIndexedDb(); 
     fetchInspections();
   }, [fetchInspections]);
 

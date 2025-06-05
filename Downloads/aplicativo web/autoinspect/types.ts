@@ -3,6 +3,7 @@ export interface Photo {
   name: string; // e.g., 'Front View', 'VIN Number'
   base64: string | null;
   file?: File | null; // Temporary storage for file object before converting to base64
+  note?: string; // Optional note for the photo
 }
 
 export interface Vehicle {

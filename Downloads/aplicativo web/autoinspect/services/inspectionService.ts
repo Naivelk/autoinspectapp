@@ -3,44 +3,18 @@ import { SavedInspection, PhotoCategoryKey, PhotoCategoryConfig, AllPhotoCategor
 import { initialVehicleState } from '../constants.ts';
 import * as inspectionDb from './inspectionDb';
 
-const LOCAL_STORAGE_KEY = 'autoinspect_saved_inspections';
-const MIGRATION_FLAG_KEY = 'autoinspect_migrated_to_indexeddb';
-
-export async function autoMigrateLocalStorageToIndexedDb() {
-  if (typeof window === 'undefined') return;
-  // Siempre intentamos limpiar localStorage, aunque ya esté migrado
-  const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-  if (raw) {
-    try {
-      const inspections = JSON.parse(raw);
-      if (Array.isArray(inspections) && inspections.length > 0) {
-        await inspectionDb.overwriteAllInspections(inspections);
-      }
-    } catch (e) {
-      console.error('Migration from localStorage to IndexedDB failed:', e);
-    }
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-  }
-  localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
-}
-
-// Limpieza manual para usar desde la UI
-export function clearLegacyLocalStorageInspections() {
-  localStorage.removeItem(LOCAL_STORAGE_KEY);
-  localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
-}
-
-
-// Ejecutar migración automática al cargar el módulo
-autoMigrateLocalStorageToIndexedDb();
-
+// Clave para almacenar el nombre del agente por defecto
 const DEFAULT_AGENT_NAME_KEY = 'autoinspect_default_agent_name';
 
+// Obtener el nombre del agente por defecto desde el almacenamiento local
 export const getDefaultAgentName = (): string => {
+  if (typeof window === 'undefined') return '';
   return localStorage.getItem(DEFAULT_AGENT_NAME_KEY) || '';
 };
 
+// Guardar el nombre del agente por defecto en el almacenamiento local
 export const saveDefaultAgentName = (name: string): void => {
+  if (typeof window === 'undefined') return;
   localStorage.setItem(DEFAULT_AGENT_NAME_KEY, name);
 };
 

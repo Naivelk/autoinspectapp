@@ -5,8 +5,8 @@ import { InspectionContext } from '../App.tsx';
 import PageContainer from '../components/PageContainer.tsx';
 import Button from '../components/Button.tsx';
 import WizardSteps from '../components/WizardSteps.tsx';
-import { InspectionStep, SavedInspection, AllPhotoCategoryKeys, PhotoCategoryConfig } from '../types.ts'; 
-import { generatePdf, generatePdfBlobUrl, generatePdfBlobUrlSoloTexto } from '../services/pdfGenerator.ts';
+import { InspectionStep, SavedInspection, AllPhotoCategoryKeys, PhotoCategoryConfig, Inspection } from '../types.ts'; 
+import { generatePdf } from '../services/pdfGenerator';
 import { saveInspection } from '../services/inspectionService.ts';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -31,34 +31,34 @@ const SummaryItem: React.FC<SummaryItemProps> = ({ label, value, isMissing = fal
 
 const SummaryScreen: React.FC = () => {
   const [visibleError, setVisibleError] = useState<string | null>(null);
-  const [pdfPreviewUrl, setPdfPreviewUrl] = useState<string | null>(null);
-  const [isPreviewingPdf, setIsPreviewingPdf] = useState<boolean>(false);
-
-  // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
-  useEffect(() => {
-    setIsGeneratingPdf(false);
-  }, [currentInspection.id]); // Si el id cambia, también reinicia (nuevo registro o regreso)
-
-  // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
-  useEffect(() => {
-    setIsGeneratingPdf(false);
-  }, [currentInspection.id]); // Si el id cambia, también reinicia (nuevo registro o regreso)
-
-  console.log("SummaryScreen: Component rendering/re-rendering"); 
   const context = useContext(InspectionContext);
   const navigate = useNavigate();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showErrorModal, setShowErrorModal] = useState(false);
   
+  // Obtener valores del contexto
+  if (!context) return <div>Loading...</div>;
+  
+  const { 
+    currentInspection, 
+    setCurrentStep, 
+    currentStep: wizardCurrentStep, 
+    resetInspection, 
+    setCurrentVehicleIndex 
+  } = context;
+
+  // Reiniciar el estado de generación de PDF cada vez que se monta la pantalla de resumen
+  useEffect(() => {
+    setIsGeneratingPdf(false);
+  }, [currentInspection?.id]); // Si el id cambia, también reinicia (nuevo registro o regreso)
+
+
+  console.log("SummaryScreen: Component rendering/re-rendering"); 
+  const [showErrorModal, setShowErrorModal] = useState(false);
   const [modalMessage, setModalMessage] = useState<string | null>(null);
   const [modalTitle, setModalTitle] = useState<string>("Operation Status");
   const [isQuotaErrorContext, setIsQuotaErrorContext] = useState(false);
   const [canRestartInspectionOnError, setCanRestartInspectionOnError] = useState(false);
-
-
-  if (!context) return <div>Loading...</div>;
-  const { currentInspection, setCurrentStep, currentStep: wizardCurrentStep, resetInspection, setCurrentVehicleIndex } = context;
 
   useEffect(() => {
     try {
@@ -94,8 +94,21 @@ const SummaryScreen: React.FC = () => {
   }, [currentInspection, navigate, setCurrentStep, setCurrentVehicleIndex]);
 
 
+  // Convertir Inspection a SavedInspection añadiendo la propiedad pdfGenerated
+  const getSavedInspection = (inspection: Inspection): SavedInspection => {
+    return {
+      ...inspection,
+      pdfGenerated: false // Inicialmente falso hasta que se genere el PDF
+    };
+  };
+
+  // Obtener la inspección guardada
+  const savedInspection = currentInspection ? getSavedInspection(currentInspection) : null;
+
   const handleGeneratePdf = async () => {
     console.log("SummaryScreen: handleGeneratePdf invoked (New Logic)");
+    if (!savedInspection) return;
+    
     setIsGeneratingPdf(true);
     setModalMessage(null);
     setModalTitle("Operation Status");
@@ -195,88 +208,6 @@ const SummaryScreen: React.FC = () => {
       <WizardSteps currentStep={wizardCurrentStep} />
       <div className="space-y-6 p-1">
 
-        {/* PDF Preview Section */}
-        {isPreviewingPdf && (
-          <div className="mb-4 flex flex-col items-center">
-            <div className="w-full max-w-[480px] border rounded shadow bg-white p-2">
-              <iframe
-                src={pdfPreviewUrl || ''}
-                title="PDF Preview"
-                style={{ width: '100%', height: '60vh', minHeight: 360, border: 'none' }}
-                loading="lazy"
-                sandbox="allow-scripts allow-same-origin"
-              />
-            </div>
-            <div className="flex gap-2 mt-2">
-              <Button onClick={() => setIsPreviewingPdf(false)} variant="outline">Cerrar Preview</Button>
-              <Button onClick={async () => {
-                setIsPreviewingPdf(false);
-                await handleGeneratePdf();
-              }}>Descargar PDF</Button>
-            </div>
-          </div>
-        )}
-
-        {/* Botón de prueba: PDF SOLO TEXTO */}
-        {!isPreviewingPdf && (
-          <div className="flex flex-col items-center gap-2 mb-4">
-            <Button
-              variant="outline"
-              onClick={async () => {
-                setIsGeneratingPdf(true);
-                setModalMessage(null);
-                setModalTitle("Generando preview SOLO TEXTO...");
-                setShowSuccessModal(false);
-                setShowErrorModal(false);
-                setPdfPreviewUrl(null);
-                try {
-                  const url = await generatePdfBlobUrlSoloTexto(currentInspection);
-                  setPdfPreviewUrl(url);
-                  setIsPreviewingPdf(true);
-                } catch (err: any) {
-                  setModalTitle("Error de PDF SOLO TEXTO");
-                  setModalMessage(String(err));
-                  setShowErrorModal(true);
-                } finally {
-                  setIsGeneratingPdf(false);
-                }
-              }}
-              size="md"
-              isLoading={isGeneratingPdf}
-              className="w-full sm:w-auto"
-            >
-              {isGeneratingPdf ? 'Generando...' : 'Vista Previa SOLO TEXTO'}
-            </Button>
-
-            {/* PDF Preview Button normal */}
-            <Button
-              onClick={async () => {
-                setIsGeneratingPdf(true);
-                setModalMessage(null);
-                setModalTitle("Generando preview de PDF...");
-                setShowSuccessModal(false);
-                setShowErrorModal(false);
-                setPdfPreviewUrl(null);
-                try {
-                  const url = await generatePdfBlobUrl(currentInspection);
-                  setPdfPreviewUrl(url);
-                  setIsPreviewingPdf(true);
-                } catch (err: any) {
-                  setModalTitle("Error de Preview PDF");
-                  setModalMessage(String(err));
-                  setShowErrorModal(true);
-                } finally {
-                  setIsGeneratingPdf(false);
-                }
-              }}
-              size="lg"
-              isLoading={isGeneratingPdf}
-              className="w-full sm:w-auto"
-            >
-              {isGeneratingPdf ? 'Generando Preview...' : 'Vista Previa PDF'}
-            </Button>
-          </div>
-        )}
 
         <section className="bg-white p-4 rounded-lg shadow">
           <h2 className="text-lg font-semibold app-text-secondary mb-3">Inspector & Insured Details</h2>
@@ -328,14 +259,23 @@ const SummaryScreen: React.FC = () => {
           );
         })}
 
-        <div className="mt-8 flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:justify-between items-center p-1">
-          <Button onClick={() => {
-            setCurrentVehicleIndex(currentInspection.vehicles.length - 1); 
-            navigate('/photos');
-          }} variant="outline" className="w-full sm:w-auto">
+        <div className="mt-8 flex flex-col space-y-3 sm:flex-row sm:justify-between items-center p-1">
+          <Button 
+            onClick={() => {
+              setCurrentVehicleIndex(currentInspection.vehicles.length - 1); 
+              navigate('/photos');
+            }} 
+            variant="outline" 
+            className="w-full sm:w-auto"
+          >
             Back to Photos
           </Button>
-          <Button onClick={handleGeneratePdf} size="lg" isLoading={isGeneratingPdf} className="w-full sm:w-auto">
+          <Button 
+            onClick={handleGeneratePdf} 
+            size="lg" 
+            isLoading={isGeneratingPdf}
+            className="w-full sm:w-auto"
+          >
             {isGeneratingPdf ? 'Processing...' : 'Generate & Save PDF'}
           </Button>
         </div>
