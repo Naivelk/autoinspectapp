@@ -43,7 +43,6 @@ const PhotoUploadCard: React.FC<PhotoUploadCardProps> = ({ photoSlot, onPhotoCha
       <input
         type="file"
         accept="image/*"
-        capture="environment" // Prioritize back camera on mobile
         ref={fileInputRef}
         onChange={handleFileChange}
         className="hidden"
