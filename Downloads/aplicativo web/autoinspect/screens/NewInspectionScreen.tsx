@@ -28,7 +28,7 @@ const NewInspectionScreen: React.FC = () => {
   const [generalData, setGeneralData] = useState({
     agentName: '',
     insuredName: '',
-    insuredDOB: '',
+    policyNumber: '',
   });
 
   const [activeVehicleData, setActiveVehicleData] = useState<Vehicle>(
@@ -43,7 +43,7 @@ const NewInspectionScreen: React.FC = () => {
     setGeneralData({
       agentName: currentInspection.agentName,
       insuredName: currentInspection.insuredName,
-      insuredDOB: currentInspection.insuredDOB,
+      policyNumber: currentInspection.policyNumber || '',
     });
 
     if (currentInspection.vehicles && currentInspection.vehicles[currentVehicleIndex]) {
@@ -57,7 +57,7 @@ const NewInspectionScreen: React.FC = () => {
     } else {
       setActiveVehicleData(initialVehicleState());
     }
-  }, [currentInspection.agentName, currentInspection.insuredName, currentInspection.insuredDOB, currentInspection.vehicles, currentVehicleIndex]);
+  }, [currentInspection.agentName, currentInspection.insuredName, currentInspection.vehicles, currentVehicleIndex]);
 
 
   useEffect(() => {
@@ -98,7 +98,7 @@ const persistLocalFormToContext = () => {
       ...prevInsp,
       agentName: generalData.agentName,
       insuredName: generalData.insuredName,
-      insuredDOB: generalData.insuredDOB,
+      policyNumber: generalData.policyNumber,
       vehicles: updatedVehicles,
     };
   });
@@ -119,7 +119,7 @@ const persistLocalFormToContext = () => {
     ...currentInspection,
     agentName: generalData.agentName,
     insuredName: generalData.insuredName,
-    insuredDOB: generalData.insuredDOB,
+    policyNumber: generalData.policyNumber,
     vehicles: vehiclesFromContext,
   };
 };
@@ -138,7 +138,7 @@ const persistLocalFormToContext = () => {
       ...prevInsp,
       agentName: generalData.agentName,
       insuredName: generalData.insuredName,
-      insuredDOB: generalData.insuredDOB,
+      policyNumber: generalData.policyNumber,
       vehicles: updatedVehicles,
     };
   });
@@ -201,23 +201,6 @@ const persistLocalFormToContext = () => {
   const validateForm = (): boolean => {
     let newErrors: Record<string, any> = {};
     if (!generalData.agentName.trim()) newErrors.agentName = "Agent name is required.";
-    
-    if (generalData.insuredDOB) {
-        const dobPattern = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dobPattern.test(generalData.insuredDOB)) {
-            newErrors.insuredDOB = "Invalid date format (YYYY-MM-DD).";
-        } else {
-            const birthDate = new Date(generalData.insuredDOB);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const m = today.getMonth() - birthDate.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            if (age < 16) newErrors.insuredDOB = "If provided, insured must be at least 16 years old.";
-            if (birthDate > today) newErrors.insuredDOB = "Date of birth cannot be in the future.";
-        }
-    }
 
     const inspectionStateForValidation = currentInspection;
 
@@ -270,7 +253,7 @@ const persistLocalFormToContext = () => {
           <h2 className="text-lg font-semibold mb-4" style={{color: 'var(--app-color-secondary-text)'}}>Inspector & Insured Details</h2>
           <Input label="Agent's Name" name="agentName" value={generalData.agentName} onChange={handleGeneralChange} error={errors.agentName} placeholder="Enter agent's name" />
           <Input label="Insured's Name (Optional)" name="insuredName" value={generalData.insuredName} onChange={handleGeneralChange} error={errors.insuredName} placeholder="Enter insured's name" />
-          <Input label="Insured's Date of Birth (Optional)" name="insuredDOB" type="date" value={generalData.insuredDOB} onChange={handleGeneralChange} error={errors.insuredDOB} />
+          <Input label="Policy Number (Optional)" name="policyNumber" value={generalData.policyNumber} onChange={handleGeneralChange} error={errors.policyNumber} placeholder="Enter policy number" />
         </section>
 
         <section className="space-y-5">

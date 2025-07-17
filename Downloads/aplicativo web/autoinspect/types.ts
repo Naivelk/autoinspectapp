@@ -13,6 +13,7 @@ export interface Vehicle {
   make: string;
   model: string;
   year: string;
+  licensePlate?: string;
   photos: {
     front: Photo;
     back: Photo;
@@ -29,7 +30,7 @@ export interface Inspection {
   id: string; // Unique ID: InsuredName_VehicleModelVehicleYear_Timestamp (Primary vehicle used for ID)
   agentName: string;
   insuredName: string;
-  insuredDOB: string;
+  policyNumber?: string;
   inspectionDate: string; // ISO string
   vehicles: Vehicle[]; // Changed from single vehicle to array
 }

@@ -100,6 +100,80 @@ AutoInspect es una aplicación web progresiva (PWA) para inspección de vehícul
 
 ## 📝 Licencia
 
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+---
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, lee las [pautas de contribución](CONTRIBUTING.md) antes de enviar un pull request.
+
+---
+
+## 📄 Documentación adicional
+
+### Estructura de la base de datos
+
+La aplicación utiliza IndexedDB con el siguiente esquema principal:
+
+- **inspecciones**: Almacena todas las inspecciones realizadas
+  - id: Identificador único
+  - fecha: Fecha de creación
+  - datosGenerales: Información del asegurado, agente, etc.
+  - vehiculos: Array de vehículos inspeccionados
+  - fotos: Objeto con las fotos organizadas por categoría
+  - pdfGenerado: Indica si ya se generó el PDF
+
+### Manejo de errores
+
+- La aplicación incluye manejo de errores para:
+  - Carga de imágenes
+  - Generación de PDF
+  - Operaciones de base de datos
+  - Validación de formularios
+
+### Rendimiento
+
+- Se implementaron las siguientes optimizaciones:
+  - Carga perezosa de componentes
+  - Memoización de componentes costosos
+  - Optimización de imágenes antes de guardar
+  - Uso de virtualización para listas largas
+
+---
+
+## 📱 Compatibilidad
+
+- Navegadores modernos (Chrome, Firefox, Safari, Edge)
+- Dispositivos móviles (iOS/Android)
+- Modo offline completo
+
+## 📞 Soporte
+
+Para reportar problemas o solicitar características, por favor abre un [issue](https://github.com/Naivelk/-autoinspectapp/issues) en el repositorio.
+
+---
+
+## 🎯 Próximas características
+
+- [ ] Sincronización con la nube
+- [ ] Plantillas personalizables de informes
+- [ ] Firma digital en los informes
+- [ ] Exportación a Excel/CSV
+- [ ] Autenticación de usuarios
+
+---
+
+## 🙏 Agradecimientos
+
+- A la comunidad de código abierto por las increíbles herramientas utilizadas
+- A los contribuyentes que ayudan a mejorar este proyecto
+- A los usuarios por sus valiosos comentarios y sugerencias
+
+---
+
+## 📄 Licencia
+
 MIT. Desarrollado por Kevin Santiago Quimbaya Andrade.
 
 ---

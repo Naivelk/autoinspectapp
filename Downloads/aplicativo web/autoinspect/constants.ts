@@ -30,7 +30,7 @@ export const initialInspectionState = (): Inspection => ({
   id: '',
   agentName: getDefaultAgentName(), // Usar nombre de agente predeterminado
   insuredName: '',
-  insuredDOB: '',
+  policyNumber: '',
   inspectionDate: new Date().toISOString(),
   vehicles: [initialVehicleState()], // Initialize with one vehicle
 });

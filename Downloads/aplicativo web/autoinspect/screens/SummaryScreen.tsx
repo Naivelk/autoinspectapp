@@ -213,7 +213,7 @@ const SummaryScreen: React.FC = () => {
           <h2 className="text-lg font-semibold app-text-secondary mb-3">Inspector & Insured Details</h2>
           <SummaryItem label="Agent's Name" value={currentInspection.agentName} />
           <SummaryItem label="Insured's Name" value={currentInspection.insuredName} isMissing={!currentInspection.insuredName} />
-          <SummaryItem label="Insured's DOB" value={currentInspection.insuredDOB ? new Date(currentInspection.insuredDOB).toLocaleDateString() : ''} isMissing={!currentInspection.insuredDOB} />
+          <SummaryItem label="Policy Number" value={currentInspection.policyNumber || ''} isMissing={!currentInspection.policyNumber} />
           <SummaryItem label="Inspection Date" value={new Date(currentInspection.inspectionDate).toLocaleDateString()} />
         </section>
 
